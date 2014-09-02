@@ -1,0 +1,8 @@
+<template name="quiz">
+  {{publicData.word}}
+    {{#each answerOptions}}      
+      <button id="{{answerOption}}" data-wordId="{{word_id}}" class='answerOption'>{{answerOption}}</button> <br>
+    {{/each}}
+      
+  
+</template>

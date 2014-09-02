@@ -1,0 +1,52 @@
+<template name="selfEval">
+  <form id='form'>
+  <table>
+  <tr>
+    <td>
+    word
+    </td>
+    <td>
+    definition
+    </td>
+    <td>
+    <b>{{difficultyOptions 0}}</b>
+    </td>
+    <td>
+    <b>{{difficultyOptions 1}}</b>
+    </td>
+        <td>
+    <b>{{difficultyOptions 2}}</b>
+    </td>
+        <td>
+    <b>{{difficultyOptions 3}}</b>
+    </td>
+  </tr>
+  
+  {{#each vocab}}
+  
+    <tr>
+      <td>
+        {{public_data.word}}
+      </td>
+      <td>
+        {{public_data.definition}}
+      </td>
+      <td>        
+        <input type="radio" name = "{{public_data._id}}_radio" value="gotIt"> 
+      </td>
+      <td>        
+        <input type="radio" name = "{{public_data._id}}_radio" value="someReview"> 
+      </td>
+      <td>        
+        <input type="radio" name = "{{public_data._id}}_radio" value="needToLearn"> 
+      </td>
+      <td>        
+        <input type="radio" name = "{{public_data._id}}_radio" value="hard"> 
+      </td>
+    </tr>
+  {{/each}}
+  </table>
+  <button id="submit" type="submit">Next</button>
+  
+  </form>
+</template>
