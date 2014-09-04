@@ -1,0 +1,57 @@
+<template name="resultsSummary">
+<h3>Results Summary</h3>
+
+{{results.percentCorrect}}% Correct! ({{results.numCorrect}} of {{results.numTotal}})
+
+<br>
+
+<h3> Correct Words </h3>
+<table>
+  <tr>
+    <td> Word
+    </td>
+    <td> Definition
+    </td>
+    <td> Difficulty Estimate
+    </td>
+  </tr>
+  {{#each results.correctAnswers}}
+    <tr>
+      <td>
+        {{this.public_data.word}}
+      </td>
+      <td>
+        {{this.public_data.definition}}
+      </td>
+      <td>
+        {{this.public_data.difficultyOption}}
+      </td>
+    </tr>
+  {{/each}}
+</table>
+
+<h3> Incorrect Words </h3>
+<table>
+  <tr>
+    <td> Word
+    </td>
+    <td> Definition
+    </td>
+    <td> Difficulty Estimate
+    </td>
+  </tr>
+  {{#each results.incorrectAnswers}}
+    <tr>
+      <td>
+        {{this.public_data.word}}
+      </td>
+      <td>
+        {{this.public_data.definition}}
+      </td>
+      <td>
+        {{this.public_data.difficultyOption}}
+      </td>
+    </tr>
+  {{/each}}
+</table>
+</template>

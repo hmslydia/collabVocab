@@ -1,5 +1,6 @@
 <template name="quiz">
-  {{publicData.word}}
+  <b>{{publicData.word}}</b><br>
+  Select the correct definition:<br>
     {{#each answerOptions}}      
       <button id="{{answerOption}}" data-wordId="{{word_id}}" class='answerOption'>{{answerOption}}</button> <br>
     {{/each}}

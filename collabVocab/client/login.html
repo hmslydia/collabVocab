@@ -1,8 +1,15 @@
 <template name="welcome">
+
+  
 {{#if currentUser}}
-  <button id="selfEval">Step 1. Take the self evaluation</button><br>
-  <button id="quiz">Step 2. Take the quiz!</button><br>
-  <button id="resultsSummary">Step 3. Review results</button><br>
+  {{#each units}}
+    {{this.name}}    
+    <button class="selfEval" >Step 1. Take the self evaluation</button>
+    <button class="quiz">Step 2. Take the quiz!</button>
+    <button class="resultsSummary" >Step 3. Review results</button>
+    <br>
+    <br>
+  {{/each}}
 {{else}}
   {{> loginButtons}}
 {{/if}}

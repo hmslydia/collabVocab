@@ -9,6 +9,4 @@ cmather:iron-router@0.8.2
 accounts-base
 accounts-ui
 accounts-password
-mrt:bootstrap-3@3.2.0-1
 mizzao:bootstrap-3
-

@@ -1,3 +1,4 @@
+/*
 var words = [
   {word: "a", definition: "A"},
   {word: "b", definition: "B"},
@@ -9,23 +10,37 @@ var words = [
   {word: "h", definition: "H"},
   {word: "i", definition: "I"}  
   ]
+*/
   
 getTime = function(){
   return (new Date()).getTime()
 }
 
+initWordSets = function(word_ids){
+  var numWords = word_ids.length
+  var sizeOfWordSet = 15
+  var numUnits = Math.floor(numWords/sizeOfWordSet)
+  for(var i = 0; i<numUnits; i++){
+    var wordSetStart = (i * 15)
+    var wordSetStop = wordSetStart + 15
+    var word_set = word_ids.slice(wordSetStart,wordSetStop)
+    WordSets.insert({word_ids: word_set})
+  }      
+}
+
 Meteor.startup(function () {	
   var word_ids = []
   if (Words.find().count() === 0) {
-    for (var i = 0; i < words.length; i++) {
-			var thisWordObj = words[i]
+    for (var i = 0; i < vocab.length; i++) {
+			var thisWordObj = vocab[i]
       var word_id = Words.insert(thisWordObj)
       word_ids.push(word_id)
     }
   }
   
   if(WordSets.find().count() === 0){
-    WordSets.insert({word_ids: word_ids})
+    initWordSets(word_ids)
+
   }
 })
 
@@ -36,6 +51,12 @@ function augmentInsertObj(insertObj){
   return insertObj
 }
 
+/*
+var setModifier = { $set: {} };
+setModifier.$set['profile.' + index + '.profile'] = "completed";
+Items.update(Session.get('selectedItem'), setModifier);
+*/
+
 function incrementPage(stage){
   var page = parseInt(Meteor.user().profile[stage].page)
   var numPages = parseInt(Meteor.user().profile[stage].numPages)
@@ -43,7 +64,7 @@ function incrementPage(stage){
 
   if(page == (numPages-1)){
     //var varToSet = "profile."+stage+".status"
-    Meteor.users.update({_id:Meteor.user()._id}, {$set: {"profile.quiz.status":"completed"}})
+    Meteor.users.update({_id:Meteor.user()._id}, {$set: {"profile.quiz.profile":"completed"}})
     diagnosticNumberCrunch(Meteor.userId(), Meteor.user().profile.currentUnitId)
   } else {
     if (page == 0){
@@ -96,8 +117,8 @@ function createSelfEvalStage(user_id, word_set_id, wordsPerPage, unit_id){
   var num_words = word_ids.length  
   
   var num_pages = Math.ceil(num_words/wordsPerPage)
-  //enter something into the StageMetaData collection
-  var stage_meta_data_id = StageMetaData.insert({
+  //enter something into the Stages collection
+  var stage_id = Stages.insert({
     user_id: user_id,
     creation_time: getTime(),
     stage_type: stage_type,
@@ -113,7 +134,7 @@ function createSelfEvalStage(user_id, word_set_id, wordsPerPage, unit_id){
     
     StageData.insert({
       user_id: user_id,
-      stage_meta_data_id: stage_meta_data_id,
+      stage_id: stage_id,
       stage_type: stage_type,
       page: page,
       public_data: wordObj,
@@ -121,7 +142,7 @@ function createSelfEvalStage(user_id, word_set_id, wordsPerPage, unit_id){
       //private_data: (none)
     })
   })
-  return stage_meta_data_id
+  return stage_id
 }
 
 function createQuizStage(user_id, word_set_id, numAnswerOptions, unit_id){
@@ -172,7 +193,7 @@ function createQuizStage(user_id, word_set_id, numAnswerOptions, unit_id){
   })
   
   //Insert Stuff
-  var stage_meta_data_id = StageMetaData.insert({
+  var stage_id = Stages.insert({
     user_id: user_id,
     creation_time: getTime(),
     stage_type: stage_type,
@@ -185,7 +206,7 @@ function createQuizStage(user_id, word_set_id, numAnswerOptions, unit_id){
   _.each(pageObjs, function(pageObj){    
     StageData.insert({
       user_id: user_id,
-      stage_meta_data_id: stage_meta_data_id,
+      stage_id: stage_id,
       stage_type: stage_type,
       page: pageObj.page,
       public_data: pageObj,
@@ -193,7 +214,7 @@ function createQuizStage(user_id, word_set_id, numAnswerOptions, unit_id){
       //private_data: (none)
     })
   })
-  return stage_meta_data_id
+  return stage_id
   
 }
 
@@ -201,7 +222,7 @@ createResultSummaryStage = function(user_id, word_set_id, unit_id){
 //Insert Stuff
   var stage_type = "resultsSummary"
   var num_pages = 1
-  var stage_meta_data_id = StageMetaData.insert({
+  var stage_id = Stages.insert({
     user_id: user_id,
     creation_time: getTime(),
     stage_type: stage_type,
@@ -210,6 +231,8 @@ createResultSummaryStage = function(user_id, word_set_id, unit_id){
     unit_id: unit_id
   })
    
+   //The stage data will be inserted when it's created after the quiz
+  /* 
   summary = {} //SUMMARY IS BLANK WHEN INITIALIZED, it will be populate after they complete the quiz   
   StageData.insert({
     user_id: user_id,
@@ -220,53 +243,59 @@ createResultSummaryStage = function(user_id, word_set_id, unit_id){
     unit_id: unit_id
     //private_data: (none)
   })
-  
-  return stage_meta_data_id  
+  */
+  return stage_id  
 }
 
 //statuses: ['notStarted', 'inProgress', 'completed']
 
 
 createDiagnosticUnit = function(user){
-  var user_id = user._id
+  var wordSets = WordSets.find().fetch()
+  _.each(wordSets, function(word_set, i){
+    var user_id = user._id
+    
+    // insert a new unit
+    var name = "Unit "+i
+    var unit_id = Units.insert({user_id: user_id, name: name, stages: []}) //for now, init to blank, will populate later
   
-  // insert a new unit
-  var unit_id = Units.insert({user_id: user_id, stages: []}) //for now, init to blank, will populate later
-
-  var word_set = WordSets.findOne() //IMPROVE THIS
-  var wordsPerPage = 3
+    //var word_set = WordSets.findOne() //IMPROVE THIS
+    var wordsPerPage = 3
+    
+    var selfEvalStageId = createSelfEvalStage(user_id, word_set._id, wordsPerPage, unit_id)
+    
+    var numAnswerOptions = 5
+    var quizStageId = createQuizStage(user_id, word_set._id, numAnswerOptions, unit_id)
+    
+    var resultSummaryStageId = createResultSummaryStage(user_id, word_set._id, unit_id)
+    
+    var stagesData = []
+    stagesData.push({type: 'selfEval', id: selfEvalStageId})
+    stagesData.push({type: 'quiz', id: quizStageId})
+    stagesData.push({type: 'resultsSummary', id: resultSummaryStageId})
+    
+    
+    
+    Units.update({_id: unit_id}, {$set: {"stages": stagesData }})
+    
+    // initialize this unit for the user
+    // (set the profile information )
+    /*
+    var diagnosticStages = ['selfEval', 'quiz', 'resultsSummary']
+    _.each(diagnosticStages,function(stage){
+      user.profile[stage] = {}  
+      user.profile[stage].page = 0
+      user.profile[stage].status = "notStarted"
+    })
   
-  var selfEvalStageMetaDataId = createSelfEvalStage(user_id, word_set._id, wordsPerPage, unit_id)
-  
-  var numAnswerOptions = 5
-  var quizStageMetaDataId = createQuizStage(user_id, word_set._id, numAnswerOptions, unit_id)
-  
-  var resultSummaryStageMetaDataId = createResultSummaryStage(user_id, word_set._id, unit_id)
-  
-  var stagesData = []
-  stagesData.push({type: 'selfEval', id: selfEvalStageMetaDataId})
-  stagesData.push({type: 'quiz', id: quizStageMetaDataId})
-  stagesData.push({type: 'resultSummary', id: resultSummaryStageMetaDataId})
-  
-  
-  
-  Units.update({_id: unit_id}, {$set: {"stages": stagesData }})
-  
-  // initialize this unit for the user
-  // (set the profile information )
-  
-  var diagnosticStages = ['selfEval', 'quiz', 'resultSummary']
-  _.each(diagnosticStages,function(stage){
-    user.profile[stage] = {}  
-    user.profile[stage].page = 0
-    user.profile[stage].status = "notStarted"
+    user.profile.currentStage = 'selfEval'
+    user.profile.currentUnitId = unit_id
+    user.profile.selfEval.numPages = Stages.findOne(selfEvalStageId).num_pages  
+    user.profile.quiz.numPages = Stages.findOne(quizStageId).num_pages
+    */
+    
   })
 
-  user.profile.currentStage = 'selfEval'
-  user.profile.currentUnitId = unit_id
-  user.profile.selfEval.numPages = StageMetaData.findOne(selfEvalStageMetaDataId).num_pages  
-  user.profile.quiz.numPages = StageMetaData.findOne(quizStageMetaDataId).num_pages
-  
 }
 
 /*
@@ -289,9 +318,9 @@ diagnosticNumberCrunch = function(user_id, unit_id){
   var unit = Units.findOne(unit_id)
   var stages = unit.stages
   
-  var selfEvalStageMetaDataId = stages[0].id
-  var quizStageMetaDataId = stages[1].id
-  var resultSummaryStageMetaDataId = stages[2].id
+  var selfEvalStageId = stages[0].id
+  var quizStageId = stages[1].id
+  var resultSummaryStageId = stages[2].id
   
   var selfEvalData = SelfEvals.find({unit_id:unit_id}).fetch()
   var quizData = QuizAnswers.find({unit_id:unit_id}).fetch()
@@ -320,7 +349,7 @@ diagnosticNumberCrunch = function(user_id, unit_id){
     StageData.insert({
       user_id: user_id,
       creation_time: getTime(),
-      stage_meta_data_id: resultSummaryStageMetaDataId,
+      stage_id: resultSummaryStageId,
       stage_type: 'resultsSummary',
       page: 0,
       public_data: obj,

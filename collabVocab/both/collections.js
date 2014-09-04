@@ -35,7 +35,7 @@ QuizAnswers = new Meteor.Collection("quizAnswers");
   unit_id:
 */
 
-ResultsReview = new Meteor.Collection("resultsReview")
+ResultsReview = new Meteor.Collection("resultsReview") //NOT YET USED
 /*
   user_id:
   unit_id:
@@ -49,7 +49,7 @@ WordSets = new Meteor.Collection("wordSets");
 word_ids = [] //array of word_ids
 */
 
-StageMetaData = new Meteor.Collection("stageMetaData"); 
+Stages = new Meteor.Collection("stages"); 
 /*
 user_id:
 creation_time:
@@ -57,6 +57,9 @@ stage_type: [selfEval, quiz, etc.]
 num_pages:
 word_set_id: word_set_id,
 unit_id: Unit this stage belongs to
+
+currentPage: 0
+status: ["notStarted", "inProgress" ,"completed"]
 */
 
 StageData = new Meteor.Collection("stageData"); //I probably should have called this Pages
@@ -69,11 +72,13 @@ page: an integer indexing the page
 public_data: ex. {word: "oblige", options; ["a", "b", "c"]}
 private_data: ex. {answer: "b"}
 unit_id: Unit this stage belongs to
+
 */
 
 Units = new Meteor.Collection("units")
 /*
 user_id:
+name: Unit1
 stages: [ {type: selfEval', stage_id: 00000000}  ] //ordered list, stage_id indexes into StageMetaData
 
 */

@@ -4,6 +4,20 @@ Router.map(function(){
     yieldTemplates: {
       'header': {to: 'header'}
     },
+    waitOn: function(){ 
+      //var user_id = Meteor.userId()
+      return [
+        Meteor.subscribe('units'), 
+        //Meteor.subscribe('stages'), 
+        //Meteor.subscribe('stageData'),
+        //Meteor.subscribe('stageData', this.params.page)
+        ] 
+    },
+    action: function () {
+      if(this.ready() ||  Meteor.user() ){
+        this.render()
+      }
+    }
   })
 
   this.route('selfEval', {
@@ -17,7 +31,7 @@ Router.map(function(){
       //var user_id = Meteor.userId()
       return [
         Meteor.subscribe('words'), 
-        Meteor.subscribe('stageMetaData'), 
+        Meteor.subscribe('stages'), 
         //Meteor.subscribe('stageData'),
         Meteor.subscribe('stageData', this.params.page)
         ] 
@@ -39,7 +53,7 @@ Router.map(function(){
     waitOn: function(){ 
       return [
         Meteor.subscribe('words'), 
-        Meteor.subscribe('stageMetaData'), 
+        Meteor.subscribe('stages'), 
         Meteor.subscribe('stageData', this.params.page)
         ] 
     },
@@ -51,7 +65,6 @@ Router.map(function(){
   })
   
   this.route('resultsSummary', {
-    //path: "selfEval/", //
     path: "resultsSummary/:page",
     yieldTemplates: {
       'header': {to: 'header'}
@@ -60,7 +73,7 @@ Router.map(function(){
     waitOn: function(){ 
       return [
         Meteor.subscribe('words'), 
-        Meteor.subscribe('stageMetaData'), 
+        Meteor.subscribe('stages'), 
         Meteor.subscribe('stageData', this.params.page)
         ] 
     },
